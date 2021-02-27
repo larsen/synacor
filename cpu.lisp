@@ -70,27 +70,23 @@
          (b nil))
     (ecase opcode
       (0 ; halt
-       (print :halt)
        (setf (halt cpu) t))
       (1 ; set A B
        (incpc! cpu)
        (setf a (aref (mem cpu) (pc cpu)))
        (incpc! cpu)
        (setf b (aref (mem cpu) (pc cpu)))
-       (format t "~a ~a ~a ~%" :set a b)
        (set-address! a b cpu)
        (incpc! cpu))
       (6 ; jmp A
        (incpc! cpu)
        (setf a (aref (mem cpu) (pc cpu)))
-       (format t "~a ~a ~%" :jmp a)
        (setf (pc cpu) a))
       (7 ; jt A B: if A is nonzero, jump to B
        (incpc! cpu)
        (setf a (aref (mem cpu) (pc cpu)))
        (incpc! cpu)
        (setf b (aref (mem cpu) (pc cpu)))
-       (format t "~a ~a ~a ~%" :jt a b)
        (if (not (zerop a))
            (setf (pc cpu)
                  (get-address b cpu))
@@ -100,7 +96,6 @@
        (setf a (aref (mem cpu) (pc cpu)))
        (incpc! cpu)
        (setf b (aref (mem cpu) (pc cpu)))
-       (format t "~a ~a ~a ~%" :jf a b)
        (if (zerop a)
            (setf (pc cpu)
                  (get-address b cpu))
