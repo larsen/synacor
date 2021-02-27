@@ -52,18 +52,17 @@
         do (format stream "~5,'0d: ~5,'0d~%" idx (aref (mem cpu) idx))))
 
 (defmethod load! (program (cpu cpu))
+  "Loads a PROGRAM (list of words) into the CPU's memory"
   (loop for idx from 0
         for word in program
         do (setf (aref (mem cpu) idx) word)))
 
-(defun reset-cpu! ()
+(defmethod reset-cpu! ((cpu cpu))
   "Reset CPU internal state"
-  (when (not *cpu*)
-    (setf *cpu* (make-instance 'cpu)))
-  (setf (pc *cpu*) 0)
+  (setf (pc cpu) 0)
   (loop for reg in '(r1 r2 r3 r4 r5 r6 r7 r8)
-        do (setf (slot-value *cpu* reg) 0))
-  *cpu*)
+        do (setf (slot-value cpu reg) 0))
+  cpu)
 
 (defmethod exec-instruction! ((cpu cpu))
   (let* ((opcode (aref (mem cpu) (pc cpu)))
