@@ -48,7 +48,7 @@
           (r1 cpu) (r2 cpu) (r3 cpu) (r4 cpu))
   (format stream "R5: ~5,'0d R6: ~5,'0d R7: ~5,'0d R8: ~5,'0d~%"
           (r5 cpu) (r6 cpu) (r7 cpu) (r8 cpu))
-  (loop for idx from (pc cpu) upto 15
+  (loop for idx from (pc cpu) upto (+ 15 (pc cpu))
         do (format stream "~5,'0d: ~5,'0d~%" idx (aref (mem cpu) idx))))
 
 (defmethod load! (program (cpu cpu))
