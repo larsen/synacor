@@ -65,49 +65,126 @@
   cpu)
 
 (defmethod exec-instruction! ((cpu cpu))
-  (let* ((opcode (aref (mem cpu) (pc cpu)))
-         (a nil)
-         (b nil))
-    (ecase opcode
-      (0 ; halt
-       (setf (halt cpu) t))
-      (1 ; set A B
-       (incpc! cpu)
-       (setf a (aref (mem cpu) (pc cpu)))
-       (incpc! cpu)
-       (setf b (aref (mem cpu) (pc cpu)))
-       (set-address! a b cpu)
-       (incpc! cpu))
-      (6 ; jmp A
-       (incpc! cpu)
-       (setf a (aref (mem cpu) (pc cpu)))
-       (setf (pc cpu) a))
-      (7 ; jt A B: if A is nonzero, jump to B
-       (incpc! cpu)
-       (setf a (aref (mem cpu) (pc cpu)))
-       (incpc! cpu)
-       (setf b (aref (mem cpu) (pc cpu)))
-       (if (not (zerop a))
-           (setf (pc cpu)
-                 (get-address b cpu))
-           (incpc! cpu)))
-      (8 ; jf A B: if A is zero, jump to B
-       (incpc! cpu)
-       (setf a (aref (mem cpu) (pc cpu)))
-       (incpc! cpu)
-       (setf b (aref (mem cpu) (pc cpu)))
-       (if (zerop a)
-           (setf (pc cpu)
-                 (get-address b cpu))
-           (incpc! cpu)))
-      (19 ; write char
-       (incpc! cpu)
-       (princ (code-char (get-address (pc cpu) cpu)))
-       (incpc! cpu))
-      (21 ; noop
-       (incpc! cpu)))))
+  (let* ((opcode (aref (mem cpu) (pc cpu))))
+    (exec! opcode cpu)))
 
 (defmethod run! ((cpu cpu))
   (loop while (not (halt cpu))
         do (exec-instruction! cpu)))
 
+(defmethod step! ((cpu cpu))
+  (exec-instruction! cpu)
+  (print cpu))
+
+(defgeneric exec! (opcode cpu))
+(defgeneric disassemble-instruction (opcode cpu))
+
+;; HALT -- 0
+;;   stop execution and terminate the program
+(defmethod exec! ((opcode (eql 0)) (cpu cpu))
+  (setf (halt cpu) t)
+  (incpc! cpu))
+
+(defmethod disassemble-instruction ((opcode (eql 0)) (cpu cpu))
+  (format nil "~5,'0d            : ~a~%" (pc cpu) :halt))
+
+;; NOOP -- 21
+;;   no operation
+(defmethod exec! ((opcode (eql 21)) (cpu cpu))
+  (incpc! cpu))
+
+(defmethod disassemble-instruction ((opcode (eql 21)) (cpu cpu))
+  (format nil "~5,'0d            : ~a~%" (pc cpu) :noop))
+
+;; SET A B -- 1
+;;   set register <a> to the value of <b>
+(defmethod exec! ((opcode (eql 1)) (cpu cpu))
+  (let ((a nil)
+        (b nil))
+    (incpc! cpu)
+    (setf a (aref (mem cpu) (pc cpu)))
+    (incpc! cpu)
+    (setf b (aref (mem cpu) (pc cpu)))
+    (set-address! a b cpu)
+    (incpc! cpu)))
+
+(defmethod disassemble-instruction ((opcode (eql 1)) (cpu cpu))
+  (format nil "~5,'0d ~5,'0d ~5,'0d: ~a ~a ~a~%"
+          (pc cpu)
+          (+ 1 (pc cpu))
+          (+ 2 (pc cpu))
+          :set 'a 'b))
+
+;; JMP A -- 6
+;;   jump to <a>
+(defmethod exec! ((opcode (eql 6)) (cpu cpu))
+  (let ((a nil))
+    (incpc! cpu)
+    (setf a (aref (mem cpu) (pc cpu)))
+    (setf (pc cpu) a)))
+
+(defmethod disassemble-instruction ((opcode (eql 6)) (cpu cpu))
+  (format nil "~5,'0d ~5,'0d      : ~a ~a~%"
+          (pc cpu)
+          (+ 1 (pc cpu))
+          :jmp 'a))
+
+;; JT A B -- 7
+;;   if <a> is nonzero, jump to <b>
+(defmethod exec! ((opcode (eql 7)) (cpu cpu))
+  (let ((a nil)
+        (b nil))
+    (incpc! cpu)
+    (setf a (aref (mem cpu) (pc cpu)))
+    (incpc! cpu)
+    (setf b (aref (mem cpu) (pc cpu)))
+    (if (not (zerop a))
+        (setf (pc cpu)
+              (get-address b cpu))
+        (incpc! cpu))))
+
+(defmethod disassemble-instruction ((opcode (eql 7)) (cpu cpu))
+  (format nil "~5,'0d ~5,'0d ~5,'0d: ~a ~a ~a~%"
+          (pc cpu)
+          (+ 1 (pc cpu))
+          (+ 2 (pc cpu))
+          :jt 'a 'b))
+
+;; JF A B -- 8
+;;   if <a> is zero, jump to <b>
+(defmethod exec! ((opcode (eql 8)) (cpu cpu))
+  (let ((a nil)
+        (b nil))
+    (incpc! cpu)
+    (setf a (aref (mem cpu) (pc cpu)))
+    (incpc! cpu)
+    (setf b (aref (mem cpu) (pc cpu)))
+    (if (zerop a)
+        (setf (pc cpu)
+              (get-address b cpu))
+        (incpc! cpu))))
+
+(defmethod disassemble-instruction ((opcode (eql 8)) (cpu cpu))
+  (format nil "~5,'0d ~5,'0d ~5,'0d: ~a ~a ~a~%"
+          (pc cpu)
+          (+ 1 (pc cpu))
+          (+ 2 (pc cpu))
+          :jf 'a 'b))
+
+;; OUT A -- 19
+;;   write the character represented by ascii code <a> to the terminal
+(defmethod exec! ((opcode (eql 19)) (cpu cpu))
+  (incpc! cpu)
+  (princ (code-char (get-address (pc cpu) cpu)))
+  (incpc! cpu))
+
+(defmethod disassemble-instruction ((opcode (eql 19)) (cpu cpu))
+  (format nil "~5,'0d ~5,'0d      : ~a ~a~%"
+               (pc cpu) (+ 1 (pc cpu))
+               :out 'a))
+
+(defmethod disassemble-instruction-at-point ((cpu cpu))
+  "Print a disassembled version of the instruction the current PC is pointing to.
+Returns a new value of the PC after consuming the instruction."
+  (let* ((opcode (aref (mem cpu) (pc cpu))))
+    (disassemble-instruction opcode cpu)))
