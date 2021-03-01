@@ -7,5 +7,6 @@
   :serial t
   :components ((:file "package")
                (:file "cpu")
+               (:file "instruction-set")
                (:file "binformat")
                (:file "synacor")))
