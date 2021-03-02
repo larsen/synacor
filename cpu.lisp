@@ -28,7 +28,7 @@
   "Sets the object (memory location or register) denoted by ADDRESS to VALUE."
   ;; - numbers 0..32767 mean a literal value
   ;; - numbers 32768..32775 instead mean registers 0..7
-  (if (and (> address 0)
+  (if (and (>= address 0)
            (<= address 32767))
       (setf (aref (mem cpu) address) value)
       (setf (slot-value cpu
@@ -36,7 +36,7 @@
             value)))
 
 (defmethod get-address (address (cpu cpu))
-  (if (and (> address 0)
+  (if (and (>= address 0)
            (<= address 32767))
       (aref (mem cpu) address)
       (slot-value cpu
