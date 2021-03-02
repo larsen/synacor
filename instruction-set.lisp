@@ -23,15 +23,15 @@
 ;;   if <a> is nonzero, jump to <b>
 (instr :jt 7 (a b)
   (if (not (zerop a))
-      (setf (pc cpu) (get-address b))))
+      (setf (pc cpu) (get-address b cpu))))
 
 ;; JF A B -- 8
 ;;   if <a> is zero, jump to <b>
 (instr :jf 8 (a b)
   (if (zerop a)
-      (setf (pc cpu) (get-address b))))
+      (setf (pc cpu) (get-address b cpu))))
 
 ;; OUT A -- 19
 ;;   write the character represented by ascii code <a> to the terminal
 (instr :out 19 (a)
-  (princ (code-char (get-address a cpu))))
+  (princ (code-char a)))
