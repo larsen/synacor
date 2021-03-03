@@ -92,7 +92,6 @@
          ,@body))
      (defmethod disassemble-instruction ((opcode (eql ,opcode)) (cpu cpu)
                                          &key instruction-pointer)
-       (declare (ignorable instruction-pointer))
        (let* ((pc (or instruction-pointer (pc cpu)))
               (instruction-size (+ 1 (length ',params)))
               (format-string (case instruction-size
