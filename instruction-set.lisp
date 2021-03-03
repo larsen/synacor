@@ -14,6 +14,16 @@
 (instr :set 1 (a b)
   (set-address! a (get-value b cpu) cpu))
 
+;; PUSH a -- 2
+;;   push <a> onto the stack
+(instr :push 2 (a)
+  (push (get-value a cpu) (stack cpu)))
+
+;; POP a -- 3
+;;   remove the top element from the stack and write it into <a>; empty stack = error
+(instr :eq 3 (a)
+  (set-address! a (pop (stack cpu)) cpu))
+
 ;; EQ a b c -- 4
 ;;   set <a> to 1 if <b> is equal to <c>; set it to 0 otherwise
 (instr :eq 4 (a b c)

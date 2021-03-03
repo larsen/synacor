@@ -19,7 +19,9 @@
    (r8 :initform 0 :accessor r8)
    ;; Memory
    (mem :initform (make-array 32768)
-        :accessor mem)))
+        :accessor mem)
+   (stack :initform '()
+          :accessor stack)))
 
 (defmethod incpc! ((cpu cpu))
   (incf (pc cpu)))
