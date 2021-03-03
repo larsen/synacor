@@ -48,8 +48,7 @@
           (r1 cpu) (r2 cpu) (r3 cpu) (r4 cpu))
   (format stream "R5: ~5,'0d R6: ~5,'0d R7: ~5,'0d R8: ~5,'0d~%"
           (r5 cpu) (r6 cpu) (r7 cpu) (r8 cpu))
-  (loop for idx from (pc cpu) upto (+ 15 (pc cpu))
-        do (format stream "~5,'0d: ~5,'0d~%" idx (aref (mem cpu) idx))))
+  (disassemble-instruction-at-point cpu :steps 10 :instruction-pointer (pc cpu)))
 
 (defmethod load! (program (cpu cpu))
   "Loads a PROGRAM (list of words) into the CPU's memory"
@@ -77,7 +76,7 @@
   (print cpu))
 
 (defgeneric exec! (opcode cpu))
-(defgeneric disassemble-instruction (opcode cpu))
+(defgeneric disassemble-instruction (opcode cpu &key))
 
 (defmacro instr (instruction-name opcode params &body body)
   (declare (ignorable params))
@@ -91,19 +90,40 @@
                    collect `(setf ,p (aref (mem cpu) (pc cpu)))
                    collect '(incpc! cpu)))
          ,@body))
-     (defmethod disassemble-instruction ((opcode (eql ,opcode)) (cpu cpu))
-       (values (format nil "~5,'0d            : ~a~%" (pc cpu) ,instruction-name)
-               (+ ,(+ 1 (length params)) (pc cpu))))))
+     (defmethod disassemble-instruction ((opcode (eql ,opcode)) (cpu cpu)
+                                         &key instruction-pointer)
+       (declare (ignorable instruction-pointer))
+       (let* ((pc (or instruction-pointer (pc cpu)))
+              (instruction-size (+ 1 (length ',params)))
+              (format-string (case instruction-size
+                               (1 "~6,'0d               : ~a~%")
+                               (2 "~6,'0d ~6,'0d        : ~a ~a~%")
+                               (3 "~6,'0d ~6,'0d ~6,'0d : ~a ~a ~a~%")))
+              (format-args (case instruction-size
+                             (1 (list (aref (mem cpu) pc) ,instruction-name))
+                             (2 (list (aref (mem cpu) pc)
+                                      (aref (mem cpu) (+ 1 pc))
+                                      ,instruction-name
+                                      (aref (mem cpu) (+ 1 pc))))
+                             (3 (list (aref (mem cpu) (pc cpu))
+                                      (aref (mem cpu) (+ 1 pc))
+                                      (aref (mem cpu) (+ 2 pc))
+                                      ,instruction-name
+                                      (aref (mem cpu) (+ 1 pc))
+                                      (aref (mem cpu) (+ 2 pc)))))))
+         (values (apply #'format nil format-string format-args)
+                 (+ instruction-size pc))))))
 
 (defgeneric disassemble-instruction-at-point (cpu &key))
 (defmethod disassemble-instruction-at-point ((cpu cpu) &key (steps 1) instruction-pointer)
   "Print a disassembled version of the instruction(s) the current PC is pointing to.
 Returns a new value of the PC after consuming the instruction."
-  (declare (ignore instruction-pointer))
-  (loop with loop-pc = (pc cpu)
+  (declare (ignorable instruction-pointer))
+  (loop with loop-pc = (or instruction-pointer (pc cpu))
         for s from 1 to steps
         for opcode = (aref (mem cpu) loop-pc)
         do (destructuring-bind (instruction-representation new-pc)
-               (multiple-value-list (disassemble-instruction opcode cpu))
-             (print instruction-representation)
+               (multiple-value-list (disassemble-instruction opcode cpu
+                                                             :instruction-pointer loop-pc))
+             (princ instruction-representation)
              (setf loop-pc new-pc))))
