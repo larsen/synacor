@@ -32,7 +32,7 @@
            (<= address 32767))
       (setf (aref (mem cpu) address) value)
       (setf (slot-value cpu
-                        (read-from-string (format nil "R~d" (+ 1 (- 32768 address)))))
+                        (read-from-string (format nil "R~d" (+ 1 (- address 32768)))))
             value)))
 
 (defmethod get-address (address (cpu cpu))
@@ -40,7 +40,14 @@
            (<= address 32767))
       (aref (mem cpu) address)
       (slot-value cpu
-                  (read-from-string (format nil "R~d" (+ 1 (- 32768 address)))))))
+                  (read-from-string (format nil "R~d" (+ 1 (- address 32768)))))))
+
+(defmethod get-value (value (cpu cpu))
+  (if (and (>= value 0)
+           (<= value 32767))
+      value
+      (slot-value cpu
+                  (read-from-string (format nil "R~d" (+ 1 (- value 32768)))))))
 
 (defmethod print-object ((cpu cpu) stream)
   (format stream "PC: ~5,'0d~%" (pc cpu))
