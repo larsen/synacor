@@ -107,7 +107,7 @@
                                       (case opcode
                                         (19 (code-char (aref (mem cpu) (+ 1 pc))))
                                         (otherwise (aref (mem cpu) (+ 1 pc))))))
-                             (3 (list pc (aref (mem cpu) (pc cpu))
+                             (3 (list pc (aref (mem cpu) pc)
                                       (aref (mem cpu) (+ 1 pc))
                                       (aref (mem cpu) (+ 2 pc))
                                       ,instruction-name
