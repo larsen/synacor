@@ -67,6 +67,20 @@
                        32768)
                 cpu))
 
+;; AND a b c -- 12
+;;   stores into <a> the bitwise and of <b> and <c>
+(instr :and 12 (a b c)
+  (set-address! a (logand (get-value b cpu)
+                          (get-value c cpu))
+                cpu))
+
+;; OR a b c -- 13
+;;   stores into <a> the bitwise or of <b> and <c>
+(instr :and 13 (a b c)
+  (set-address! a (logior (get-value b cpu)
+                          (get-value c cpu))
+                cpu))
+
 ;; OUT A -- 19
 ;;   write the character represented by ascii code <a> to the terminal
 (instr :out 19 (a)
