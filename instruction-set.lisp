@@ -76,7 +76,7 @@
 
 ;; OR a b c -- 13
 ;;   stores into <a> the bitwise or of <b> and <c>
-(instr :and 13 (a b c)
+(instr :or 13 (a b c)
   (set-address! a (logior (get-value b cpu)
                           (get-value c cpu))
                 cpu))
