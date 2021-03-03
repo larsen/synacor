@@ -81,6 +81,11 @@
                           (get-value c cpu))
                 cpu))
 
+;; NOT a b -- 14
+;;  stores 15-bit bitwise inverse of <b> in <a>
+(instr :not 14 (a b)
+  (set-address! a (lognot (get-value b cpu)) cpu))
+
 ;; OUT A -- 19
 ;;   write the character represented by ascii code <a> to the terminal
 (instr :out 19 (a)
