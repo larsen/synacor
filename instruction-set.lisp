@@ -33,6 +33,15 @@
                     1
                     0) *cpu*))
 
+;; GT a b c -- 5
+;;   set <a> to 1 if <b> is greater than <c>; set it to 0 otherwise
+(instr :gt 5 (a b c)
+  (set-address! a
+                (if (> (get-value b cpu)
+                       (get-value c cpu))
+                    1
+                    0) *cpu*))
+
 ;; JMP A -- 6
 ;;   jump to <a>
 (instr :jmp 6 (a)
