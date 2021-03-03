@@ -14,6 +14,15 @@
 (instr :set 1 (a b)
   (set-address! a (get-value b cpu) cpu))
 
+;; EQ a b c -- 4
+;;   set <a> to 1 if <b> is equal to <c>; set it to 0 otherwise
+(instr :eq 4 (a b c)
+  (set-address! a
+                (if (eql (get-value b cpu)
+                         (get-value c cpu))
+                    1
+                    0) *cpu*))
+
 ;; JMP A -- 6
 ;;   jump to <a>
 (instr :jmp 6 (a)
