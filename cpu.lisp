@@ -84,6 +84,9 @@
   (print cpu))
 
 (defgeneric exec! (opcode cpu))
+(defmethod exec! (opcode cpu)
+  (error (format nil "You should implement exec! for opcode ~a." opcode)))
+
 (defgeneric disassemble-instruction (opcode cpu &key))
 
 (defmacro instr (instruction-name opcode params &body body)
