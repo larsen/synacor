@@ -95,16 +95,18 @@
        (let* ((pc (or instruction-pointer (pc cpu)))
               (instruction-size (+ 1 (length ',params)))
               (format-string (case instruction-size
-                               (1 "~6,'0d               : ~a~%")
-                               (2 "~6,'0d ~6,'0d        : ~a ~a~%")
-                               (3 "~6,'0d ~6,'0d ~6,'0d : ~a ~a ~a~%")))
+                               (1 "~6,'0d: ~6,'0d               ; ~a~%")
+                               (2 "~6,'0d: ~6,'0d ~6,'0d        ; ~a ~a~%")
+                               (3 "~6,'0d: ~6,'0d ~6,'0d ~6,'0d ; ~a ~a ~a~%")))
               (format-args (case instruction-size
-                             (1 (list (aref (mem cpu) pc) ,instruction-name))
-                             (2 (list (aref (mem cpu) pc)
+                             (1 (list pc (aref (mem cpu) pc) ,instruction-name))
+                             (2 (list pc (aref (mem cpu) pc)
                                       (aref (mem cpu) (+ 1 pc))
                                       ,instruction-name
-                                      (aref (mem cpu) (+ 1 pc))))
-                             (3 (list (aref (mem cpu) (pc cpu))
+                                      (case opcode
+                                        (19 (code-char (aref (mem cpu) (+ 1 pc))))
+                                        (otherwise (aref (mem cpu) (+ 1 pc))))))
+                             (3 (list pc (aref (mem cpu) (pc cpu))
                                       (aref (mem cpu) (+ 1 pc))
                                       (aref (mem cpu) (+ 2 pc))
                                       ,instruction-name
