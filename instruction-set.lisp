@@ -40,7 +40,7 @@
   (if (zerop (get-value a cpu))
       (setf (pc cpu) (get-value b cpu))))
 
-;; ADD A B C
+;; ADD A B C -- 9
 ;;   assign into <a> the sum of <b> and <c> (modulo 32768)
 (instr :add 9 (a b c)
   (set-address! a (mod (+ (get-value b cpu)
