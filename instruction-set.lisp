@@ -30,6 +30,13 @@
 (instr :jf 8 (a b)
   (if (zerop a)
       (setf (pc cpu) (get-address b cpu))))
+;; ADD A B C
+;;   assign into <a> the sum of <b> and <c> (modulo 32768)
+(instr :add 9 (a b c)
+  (set-address! a (mod (+ (get-value b cpu)
+                          (get-value c cpu))
+                       32768)
+                cpu))
 
 ;; OUT A -- 19
 ;;   write the character represented by ascii code <a> to the terminal
