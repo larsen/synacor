@@ -68,6 +68,10 @@
         for word in program
         do (setf (aref (mem cpu) idx) word)))
 
+(defmethod registers-state ((cpu cpu))
+  (loop for reg in '(r1 r2 r3 r4 r5 r6 r7 r8)
+        collect (slot-value cpu reg)))
+
 (defmethod reset-cpu! ((cpu cpu))
   "Reset CPU internal state"
   (setf (pc cpu) 0)
