@@ -102,6 +102,11 @@
           do (exec-instruction! cpu))
     (if with-instruction-log
         instruction-log)))
+
+(defgeneric step! (cpu &key))
+(defmethod step! ((cpu cpu) &key (instruction-pointer nil provided-instruction-pointer-p))
+  (when provided-instruction-pointer-p
+    (setf (pc cpu) instruction-pointer))
   (exec-instruction! cpu)
   (print cpu))
 
