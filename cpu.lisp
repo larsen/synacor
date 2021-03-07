@@ -76,6 +76,7 @@
   "Reset CPU internal state"
   (setf (pc cpu) 0)
   (setf (halt cpu) nil)
+  (setf (stack cpu) nil)
   (loop for reg in '(r1 r2 r3 r4 r5 r6 r7 r8)
         do (setf (slot-value cpu reg) 0))
   cpu)
