@@ -21,7 +21,9 @@
    (mem :initform (make-array 32768)
         :accessor mem)
    (stack :initform '()
-          :accessor stack)))
+          :accessor stack)
+   (breakpoints :initform '()
+                :accessor breakpoints)))
 
 (defmethod incpc! ((cpu cpu))
   (incf (pc cpu)))
@@ -73,15 +75,27 @@
         do (setf (slot-value cpu reg) 0))
   cpu)
 
+(defmethod set-breakpoint! (instruction-pointer (cpu cpu))
+  (push instruction-pointer (breakpoints cpu)))
+
 (defmethod exec-instruction! ((cpu cpu))
   (let* ((opcode (aref (mem cpu) (pc cpu))))
     (exec! opcode cpu)))
 
-(defmethod run! ((cpu cpu))
-  (loop while (not (halt cpu))
-        do (exec-instruction! cpu)))
-
-(defmethod step! ((cpu cpu))
+(defgeneric run! (cpu &key))
+(defmethod run! ((cpu cpu) &key (with-instruction-log nil))
+  (let ((instruction-log '()))
+    (loop while (not (halt cpu))
+          if (member (pc cpu) (breakpoints cpu))
+            do (error "Execution interrupted for breakpoint!")
+          if with-instruction-log
+            do (push (list (pc cpu)
+                           (disassemble-instruction-at-point cpu :instruction-pointer (pc cpu))
+                           (registers-state cpu))
+                     instruction-log)
+          do (exec-instruction! cpu))
+    (if with-instruction-log
+        instruction-log)))
   (exec-instruction! cpu)
   (print cpu))
 
