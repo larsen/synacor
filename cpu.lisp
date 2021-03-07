@@ -54,11 +54,12 @@
                   (read-from-string (format nil "R~d" (+ 1 (- value 32768)))))))
 
 (defmethod print-object ((cpu cpu) stream)
-  (format stream "PC: ~5,'0d~%" (pc cpu))
+  (format stream "PC: ~5,'0d Halt: ~a~%" (pc cpu) (halt cpu))
   (format stream "R1: ~5,'0d R2: ~5,'0d R3: ~5,'0d R4: ~5,'0d~%"
           (r1 cpu) (r2 cpu) (r3 cpu) (r4 cpu))
   (format stream "R5: ~5,'0d R6: ~5,'0d R7: ~5,'0d R8: ~5,'0d~%"
           (r5 cpu) (r6 cpu) (r7 cpu) (r8 cpu))
+  (format stream "Stack: ~a~%" (stack cpu))
   (disassemble-instruction-at-point cpu :steps 10 :instruction-pointer (pc cpu)))
 
 (defmethod load! (program (cpu cpu))
