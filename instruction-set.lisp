@@ -67,6 +67,21 @@
                        32768)
                 cpu))
 
+;; MULT a b c -- 10
+;;   store into <a> the product of <b> and <c> (modulo 32768)
+(instr :mult 10 (a b c)
+  (set-address! a (mod (* (get-value b cpu)
+                          (get-value c cpu))
+                       32768)
+                cpu))
+
+;; MOD a b c -- 11
+;;   store into <a> the remainder of <b> divided by <c>
+(instr :mod 11 (a b c)
+  (set-address! a (mod (get-value b cpu)
+                       (get-value c cpu))
+                cpu))
+
 ;; AND a b c -- 12
 ;;   stores into <a> the bitwise and of <b> and <c>
 (instr :and 12 (a b c)
@@ -84,7 +99,36 @@
 ;; NOT a b -- 14
 ;;  stores 15-bit bitwise inverse of <b> in <a>
 (instr :not 14 (a b)
-  (set-address! a (lognot (get-value b cpu)) cpu))
+  (loop with acc = 0
+        for d across (format nil "~15,'0b" (get-value b cpu))
+        do (setf acc (+ (* 2 acc)
+                        (if (eql d #\1) 0 1)))
+        finally (set-address! a acc cpu)))
+
+;; RMEM a b -- 15
+;;   read memory at address <b> and write it to <a>
+(instr :rmem 15 (a b)
+  (set-address! a (get-address b cpu)
+                cpu))
+
+;; WMEM a b -- 16
+;;   write the value from <b> into memory at address <a>
+(instr :wmem 16 (a b)
+  (set-address! a (get-value b cpu)
+                cpu))
+
+;; CALL a -- 17
+;;   write the address of the next instruction to the stack and jump to <a>
+(instr :call 17 (a)
+  ;; When we reach this point, the PC has
+  ;; already been incremented twice.
+  (push (pc cpu) (stack cpu))
+  (setf (pc cpu) (get-value a cpu)))
+
+;; RET -- 18
+;;  remove the top element from the stack and jump to it; empty stack = halt
+(instr :ret 18 ()
+  (setf (pc cpu) (pop (stack cpu))))
 
 ;; OUT A -- 19
 ;;   write the character represented by ascii code <a> to the terminal
