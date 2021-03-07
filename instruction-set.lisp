@@ -21,7 +21,7 @@
 
 ;; POP a -- 3
 ;;   remove the top element from the stack and write it into <a>; empty stack = error
-(instr :eq 3 (a)
+(instr :pop 3 (a)
   (set-address! a (pop (stack cpu)) cpu))
 
 ;; EQ a b c -- 4
@@ -31,7 +31,7 @@
                 (if (eql (get-value b cpu)
                          (get-value c cpu))
                     1
-                    0) *cpu*))
+                    0) cpu))
 
 ;; GT a b c -- 5
 ;;   set <a> to 1 if <b> is greater than <c>; set it to 0 otherwise
@@ -40,7 +40,7 @@
                 (if (> (get-value b cpu)
                        (get-value c cpu))
                     1
-                    0) *cpu*))
+                    0) cpu))
 
 ;; JMP A -- 6
 ;;   jump to <a>
