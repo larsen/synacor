@@ -128,7 +128,10 @@
 ;; RET -- 18
 ;;  remove the top element from the stack and jump to it; empty stack = halt
 (instr :ret 18 ()
-  (setf (pc cpu) (pop (stack cpu))))
+  (let ((jump-destination (pop (stack cpu))))
+    (if jump-destination
+        (setf (pc cpu) jump-destination)
+        (setf (halt cpu) t))))
 
 ;; OUT A -- 19
 ;;   write the character represented by ascii code <a> to the terminal
