@@ -136,4 +136,6 @@
 ;; OUT A -- 19
 ;;   write the character represented by ascii code <a> to the terminal
 (instr :out 19 (a)
-  (princ (code-char (get-value a cpu))))
+  ;; (code-char (get-value a cpu))
+  (print-char (get-value a cpu)
+              cpu))

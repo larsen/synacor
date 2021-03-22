@@ -22,11 +22,25 @@
         :accessor mem)
    (stack :initform '()
           :accessor stack)
+   ;; Bus
+   (in :accessor bus-in)
+   (out :accessor bus-out)
+   ;; Inspection
    (breakpoints :initform '()
                 :accessor breakpoints)))
 
 (defmethod incpc! ((cpu cpu))
   (incf (pc cpu)))
+
+(defmethod print-char (ch (cpu cpu))
+  (setf (bus-out cpu) ch))
+
+(defmethod read-out-bus ((cpu cpu))
+  (handler-case
+      (let ((ch (bus-out cpu)))
+        (setf (bus-out cpu) nil)
+        ch)
+    (unbound-slot ())))
 
 (defmethod set-address! (address value (cpu cpu))
   "Sets the object (memory location or register) denoted by ADDRESS to VALUE."
