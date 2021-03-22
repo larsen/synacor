@@ -103,7 +103,7 @@
     (exec! opcode cpu)))
 
 (defgeneric run! (cpu &key))
-(defmethod run! ((cpu cpu) &key (with-instruction-log nil))
+(defmethod run! ((cpu cpu) &key (with-instruction-log nil) (callback nil provided-callback-p))
   (let ((instruction-log '()))
     (loop while (not (halt cpu))
           if (member (pc cpu) (breakpoints cpu))
@@ -113,15 +113,20 @@
                            (disassemble-instruction-at-point cpu :instruction-pointer (pc cpu))
                            (registers-state cpu))
                      instruction-log)
-          do (exec-instruction! cpu))
+          do (progn (exec-instruction! cpu)
+                    (when provided-callback-p
+                      (funcall callback))))
     (if with-instruction-log
         instruction-log)))
 
 (defgeneric step! (cpu &key))
-(defmethod step! ((cpu cpu) &key (instruction-pointer nil provided-instruction-pointer-p))
+(defmethod step! ((cpu cpu) &key (instruction-pointer nil provided-instruction-pointer-p)
+                              (callback nil provided-callback-p))
   (when provided-instruction-pointer-p
     (setf (pc cpu) instruction-pointer))
   (exec-instruction! cpu)
+  (when provided-callback-p
+    (funcall callback))
   (print cpu))
 
 (defgeneric exec! (opcode cpu))
