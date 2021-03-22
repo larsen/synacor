@@ -5,8 +5,15 @@
   :author "Stefano Rodighiero"
   :version "0.0.1"
   :serial t
+  :depends-on (#:qtools #:qtcore #:qtgui)
   :components ((:file "package")
                (:file "cpu")
                (:file "instruction-set")
                (:file "binformat")
-               (:file "synacor")))
+               (:file "synacor")
+               (:module "gui"
+                :components ((:file "main-window")
+                             (:file "subwidgets")
+                             (:file "layout")
+                             (:file "menu")
+                             (:file "gui")))))
