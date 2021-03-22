@@ -119,6 +119,44 @@
   (declare (ignore instruction-pointer))
   (error (format nil "You should implement disassemble-instruction for opcode ~a." opcode)))
 
+(defun address-representation (address)
+  (if (and (>= address 0)
+           (<= address 32767))
+      address
+      (format nil "R~d" (+ 1 (- address 32768)))))
+
+(defun disassemble-format-string (instruction-size)
+  (case instruction-size
+    (1 "~6,'0d: ~6,'0d                      ; ~a~%")
+    (2 "~6,'0d: ~6,'0d ~6,'0d               ; ~a ~a~%")
+    (3 "~6,'0d: ~6,'0d ~6,'0d ~6,'0d        ; ~a ~a ~a~%")
+    (4 "~6,'0d: ~6,'0d ~6,'0d ~6,'0d ~6,'0d ; ~a ~a ~a ~a~%")))
+
+(defun disassemble-format-args (opcode instruction-name instruction-size cpu)
+  (let ((pc (pc cpu)))
+    (case instruction-size
+      (1 (list pc (aref (mem cpu) pc) instruction-name))
+      (2 (list pc (aref (mem cpu) pc)
+               (aref (mem cpu) (+ 1 pc))
+               instruction-name
+               (case opcode
+                 (19 (code-char (aref (mem cpu) (+ 1 pc))))
+                 (otherwise (address-representation (aref (mem cpu) (+ 1 pc)))))))
+      (3 (list pc (aref (mem cpu) pc)
+               (aref (mem cpu) (+ 1 pc))
+               (aref (mem cpu) (+ 2 pc))
+               instruction-name
+               (address-representation (aref (mem cpu) (+ 1 pc)))
+               (address-representation (aref (mem cpu) (+ 2 pc)))))
+      (4 (list pc (aref (mem cpu) pc)
+               (aref (mem cpu) (+ 1 pc))
+               (aref (mem cpu) (+ 2 pc))
+               (aref (mem cpu) (+ 3 pc))
+               instruction-name
+               (address-representation (aref (mem cpu) (+ 1 pc)))
+               (address-representation (aref (mem cpu) (+ 2 pc)))
+               (address-representation (aref (mem cpu) (+ 3 pc))))))))
+
 (defmacro instr (instruction-name opcode params &body body)
   (declare (ignorable params))
   `(progn
@@ -135,33 +173,9 @@
                                          &key instruction-pointer)
        (let* ((pc (or instruction-pointer (pc cpu)))
               (instruction-size (+ 1 (length ',params)))
-              (format-string (case instruction-size
-                               (1 "~6,'0d: ~6,'0d                      ; ~a~%")
-                               (2 "~6,'0d: ~6,'0d ~6,'0d               ; ~a ~a~%")
-                               (3 "~6,'0d: ~6,'0d ~6,'0d ~6,'0d        ; ~a ~a ~a~%")
-                               (4 "~6,'0d: ~6,'0d ~6,'0d ~6,'0d ~6,'0d ; ~a ~a ~a ~a~%")))
-              (format-args (case instruction-size
-                             (1 (list pc (aref (mem cpu) pc) ,instruction-name))
-                             (2 (list pc (aref (mem cpu) pc)
-                                      (aref (mem cpu) (+ 1 pc))
-                                      ,instruction-name
-                                      (case opcode
-                                        (19 (code-char (aref (mem cpu) (+ 1 pc))))
-                                        (otherwise (aref (mem cpu) (+ 1 pc))))))
-                             (3 (list pc (aref (mem cpu) pc)
-                                      (aref (mem cpu) (+ 1 pc))
-                                      (aref (mem cpu) (+ 2 pc))
-                                      ,instruction-name
-                                      (aref (mem cpu) (+ 1 pc))
-                                      (aref (mem cpu) (+ 2 pc))))
-                             (4 (list pc (aref (mem cpu) pc)
-                                      (aref (mem cpu) (+ 1 pc))
-                                      (aref (mem cpu) (+ 2 pc))
-                                      (aref (mem cpu) (+ 3 pc))
-                                      ,instruction-name
-                                      (aref (mem cpu) (+ 1 pc))
-                                      (aref (mem cpu) (+ 2 pc))
-                                      (aref (mem cpu) (+ 3 pc)))))))
+              (format-string (disassemble-format-string instruction-size))
+              (format-args (disassemble-format-args
+                            opcode ,instruction-name instruction-size cpu)))
          (values (apply #'format nil format-string format-args)
                  (+ instruction-size pc))))))
 
