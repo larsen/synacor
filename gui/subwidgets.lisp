@@ -22,22 +22,29 @@
 (define-subwidget (instruction instruction-representation)
     (q+:make-qlabel representation instruction))
 
-(define-subwidget (main-window memory-dump)
-    (let* ((md (q+:make-qtablewidget main-window))
-           (cpu (cpu main-window))
-           (pc (pc cpu))
-           (instructions (synacor:disassemble-instruction-at-point cpu
+(define-widget memory-dump (QTableWidget)
+  ())
+
+(define-initializer (memory-dump setup)
+  (setf (q+:column-count memory-dump) 1)
+  (q+:hide (q+:horizontal-header memory-dump))
+  (setf (q+:stretch-last-section (q+:horizontal-header memory-dump)) T))
+
+(defun dump (widget cpu)
+  (let* ((pc (pc cpu))
+         (instructions (synacor:disassemble-instruction-at-point cpu
                           :instruction-pointer pc
                           :steps 10)))
-      (setf (q+:column-count md) 1)
       (dolist (instr instructions)
-        (let ((tindex (q+:row-count md)))
-          (q+:insert-row md tindex)
-          (setf (q+:cell-widget md tindex 0)
-                (make-instance 'instruction :representation instr))))
-      (q+:resize-rows-to-contents md)
-      (setf (q+:stretch-last-section (q+:horizontal-header md)) T)
-      (q+:hide (q+:horizontal-header md))
+        (let ((tindex (q+:row-count widget)))
+          (q+:insert-row widget tindex)
+          (setf (q+:cell-widget widget tindex 0)
+                (make-instance 'instruction :representation instr))
+          (q+:resize-rows-to-contents widget)))))
+
+(define-subwidget (main-window memory-dump)
+    (let ((md (make-instance 'memory-dump)))
+      (dump md (cpu main-window))
       md))
 
 (define-subwidget (main-window step-button)
