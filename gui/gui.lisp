@@ -24,9 +24,6 @@
 
 (define-signal (main-window print-char) (int))
 
-(define-subwidget (main-window step-button)
-    (q+:make-qpushbutton "Step" main-window))
-
 (define-slot (main-window step-button) ()
   (declare (connected step-button (released)))
   (synacor:step! (cpu main-window)
