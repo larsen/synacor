@@ -67,8 +67,15 @@
   (declare (connected main-window (program-loaded string)))
   (q+:show-message status-bar (format nil "~a loaded." program-file)))
 
+;; TODO Should they really be subwidgets?
+(define-slot (main-window memory-dump) ()
+  ;; FIXME
+  (declare (connected memory-dump (pressed))))
+
 (define-slot (main-window output-text-area) ()
+  ;; FIXME
   (declare (connected output-text-area (pressed))))
+;;
 
 (define-slot (main-window print-char) ((ch int))
   (declare (connected main-window (print-char int)))

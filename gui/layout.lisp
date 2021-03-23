@@ -36,7 +36,7 @@
     (q+:add-layout status-section pc-section)
     (q+:add-layout status-section registers-section-1)
     (q+:add-layout status-section registers-section-2)
-    (q+:add-widget status-section (q+:make-qlistwidget main-window))
+    (q+:add-widget status-section memory-dump)
     (q+:add-layout inner-display-section status-section)
 
     (q+:add-widget inner-buttons-section step-button)
@@ -53,4 +53,3 @@
     (setf (q+:layout widget) layout)
     (setf (q+:central-widget main-window) widget))
   (q+:resize main-window 500 1000))
-
