@@ -21,8 +21,8 @@
            #:run!
            #:step!
            #:read-out-bus
-           #:disassmble-instruction
-           #:disassmble-instruction-at-point))
+           #:disassemble-instruction
+           #:disassemble-instruction-at-point))
 
 (defpackage #:synacor-gui
   (:use #:cl+qt #:synacor)
