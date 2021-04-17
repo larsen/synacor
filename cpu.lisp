@@ -29,12 +29,15 @@
    (breakpoints :initform '()
                 :accessor breakpoints)))
 
+(defgeneric incpc! (cpu))
 (defmethod incpc! ((cpu cpu))
   (incf (pc cpu)))
 
+(defgeneric print-char (ch cpu))
 (defmethod print-char (ch (cpu cpu))
   (setf (bus-out cpu) ch))
 
+(defgeneric read-out-bus (cpu))
 (defmethod read-out-bus ((cpu cpu))
   (handler-case
       (let ((ch (bus-out cpu)))
@@ -42,6 +45,7 @@
         ch)
     (unbound-slot ())))
 
+(defgeneric set-address! (address value cpu))
 (defmethod set-address! (address value (cpu cpu))
   "Sets the object (memory location or register) denoted by ADDRESS to VALUE."
   ;; - numbers 0..32767 mean a literal value
@@ -53,6 +57,7 @@
                         (read-from-string (format nil "R~d" (+ 1 (- address 32768)))))
             value)))
 
+(defgeneric get-address (address cpu))
 (defmethod get-address (address (cpu cpu))
   (if (and (>= address 0)
            (<= address 32767))
@@ -60,6 +65,7 @@
       (slot-value cpu
                   (read-from-string (format nil "R~d" (+ 1 (- address 32768)))))))
 
+(defgeneric get-value (value cpu))
 (defmethod get-value (value (cpu cpu))
   (if (and (>= value 0)
            (<= value 32767))
@@ -67,6 +73,7 @@
       (slot-value cpu
                   (read-from-string (format nil "R~d" (+ 1 (- value 32768)))))))
 
+(defgeneric print-object (cpu stream))
 (defmethod print-object ((cpu cpu) stream)
   (format stream "PC: ~5,'0d Halt: ~a~%" (pc cpu) (halt cpu))
   (format stream "R1: ~5,'0d R2: ~5,'0d R3: ~5,'0d R4: ~5,'0d~%"
@@ -75,16 +82,19 @@
           (r5 cpu) (r6 cpu) (r7 cpu) (r8 cpu))
   (format stream "Stack: ~a~%" (stack cpu)))
 
+(defgeneric load! (program cpu))
 (defmethod load! (program (cpu cpu))
   "Loads a PROGRAM (list of words) into the CPU's memory"
   (loop for idx from 0
         for word in program
         do (setf (aref (mem cpu) idx) word)))
 
+(defgeneric registers-state (cpu))
 (defmethod registers-state ((cpu cpu))
   (loop for reg in '(r1 r2 r3 r4 r5 r6 r7 r8)
         collect (slot-value cpu reg)))
 
+(defgeneric reset-cpu! (cpu))
 (defmethod reset-cpu! ((cpu cpu))
   "Reset CPU internal state"
   (setf (pc cpu) 0)
@@ -94,9 +104,11 @@
         do (setf (slot-value cpu reg) 0))
   cpu)
 
+(defgeneric set-breakpoint! (instruction-pointer cpu))
 (defmethod set-breakpoint! (instruction-pointer (cpu cpu))
   (push instruction-pointer (breakpoints cpu)))
 
+(defgeneric exec-instruction! (cpu))
 (defmethod exec-instruction! ((cpu cpu))
   (let* ((opcode (aref (mem cpu) (pc cpu))))
     (exec! opcode cpu)))
@@ -130,12 +142,13 @@
 
 (defgeneric exec! (opcode cpu))
 (defmethod exec! (opcode cpu)
-  (error (format nil "You should implement exec! for opcode ~a." opcode)))
+  (declare (ignore cpu))
+  (error "You should implement exec! for opcode ~a." opcode))
 
 (defgeneric disassemble-instruction (opcode cpu &key))
 (defmethod disassemble-instruction (opcode cpu &key instruction-pointer)
   (declare (ignore instruction-pointer))
-  (error (format nil "You should implement disassemble-instruction for opcode ~a." opcode)))
+  (error "You should implement disassemble-instruction for opcode ~a." opcode))
 
 (defun address-representation (address)
   (if (and (>= address 0)
