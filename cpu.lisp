@@ -1,7 +1,5 @@
 (in-package #:synacor)
 
-(defvar *cpu* nil)
-
 (defclass cpu ()
   (
    ;; Program counter

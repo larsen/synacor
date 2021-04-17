@@ -2,6 +2,8 @@
 
 (in-package #:synacor)
 
+(defvar *cpu* nil)
+
 (defun test-machine (&key (with-instruction-log nil))
   (setf *cpu* (make-instance 'cpu))
   (reset-cpu! *cpu*)
