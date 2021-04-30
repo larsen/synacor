@@ -32,6 +32,7 @@
                              (signal! main-window (refresh-register-display string)
                                       "r1")
                              (signal! main-window (update-pc int) (pc cpu))
+                             (dump memory-dump (cpu main-window))
                              (let ((ch (synacor:read-out-bus cpu)))
                                (when ch
                                  (signal! main-window (print-char int) ch))))))
@@ -45,6 +46,7 @@
                               (signal! main-window (refresh-register-display string)
                                        "r1")
                               (signal! main-window (update-pc int) (pc cpu))
+                              (dump memory-dump (cpu main-window))
                               (let ((ch (synacor:read-out-bus cpu)))
                                 (when ch
                                   (signal! main-window (print-char int) ch)))))))
@@ -53,8 +55,8 @@
   (declare (connected reset-button (released)))
   (synacor:reset-cpu! (cpu main-window))
   (signal! main-window (update-pc int) (pc cpu))
-  (signal! main-window (refresh-register-display string)
-           "r1")
+  (signal! main-window (refresh-register-display string) "r1")
+  (dump memory-dump (cpu main-window))
   (q+:show-message status-bar "CPU reset"))
 
 (define-slot (main-window clear-output-button) ()
@@ -65,7 +67,8 @@
 
 (define-slot (main-window program-loaded) ((program-file string))
   (declare (connected main-window (program-loaded string)))
-  (q+:show-message status-bar (format nil "~a loaded." program-file)))
+  (q+:show-message status-bar (format nil "~a loaded." program-file))
+  (dump memory-dump (cpu main-window)))
 
 (define-slot (main-window print-char) ((ch int))
   (declare (connected main-window (print-char int)))
