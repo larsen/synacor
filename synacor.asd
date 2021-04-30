@@ -13,6 +13,7 @@
                (:file "synacor")
                (:module "gui"
                 :components ((:file "main-window")
+                             (:file "memory-dump")
                              (:file "subwidgets")
                              (:file "layout")
                              (:file "menu")
