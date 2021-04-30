@@ -15,6 +15,9 @@
     (q+:add-widget pc-section (q+:make-qlabel "PC" main-window))
     (q+:add-widget pc-section pc-value)
 
+    (q+:add-widget pc-section (q+:make-qlabel "Halt" main-window))
+    (q+:add-widget pc-section halt-value)
+
     (q+:add-widget registers-section-1 (q+:make-qlabel "R1" main-window))
     (q+:add-widget registers-section-1 r1-value)
     (q+:add-widget registers-section-1 (q+:make-qlabel "R2" main-window))

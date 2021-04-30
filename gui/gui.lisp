@@ -8,6 +8,13 @@
   (setf (q+:text pc-value) (format nil "~a" new-pc-value)))
 
 
+(define-signal (main-window update-halt) (string))
+
+(define-slot (main-window update-halt) ((new-halt-value string))
+  (declare (connected main-window (update-halt string)))
+  (setf (q+:text halt-value) (format nil "~a" new-halt-value)))
+
+
 (define-signal (main-window refresh-register-display) (string))
 
 (define-slot (main-window refresh-register-display) ((register-name string))
@@ -32,6 +39,10 @@
                              (signal! main-window (refresh-register-display string)
                                       "r1")
                              (signal! main-window (update-pc int) (pc cpu))
+                             (signal! main-window (update-halt string)
+                                      (if (halt cpu)
+                                          "HALT"
+                                          "-"))
                              (dump memory-dump (cpu main-window))
                              (let ((ch (synacor:read-out-bus cpu)))
                                (when ch
@@ -46,7 +57,11 @@
                               (signal! main-window (refresh-register-display string)
                                        "r1")
                               (signal! main-window (update-pc int) (pc cpu))
-                              (dump memory-dump (cpu main-window))
+                             (signal! main-window (update-halt string)
+                                      (if (halt cpu)
+                                          "HALT"
+                                          "-"))
+                             (dump memory-dump (cpu main-window))
                               (let ((ch (synacor:read-out-bus cpu)))
                                 (when ch
                                   (signal! main-window (print-char int) ch)))))))
@@ -55,6 +70,10 @@
   (declare (connected reset-button (released)))
   (synacor:reset-cpu! (cpu main-window))
   (signal! main-window (update-pc int) (pc cpu))
+  (signal! main-window (update-halt int)
+           (if (halt cpu)
+               "HALT"
+               "-"))
   (signal! main-window (refresh-register-display string) "r1")
   (dump memory-dump (cpu main-window))
   (q+:show-message status-bar "CPU reset"))

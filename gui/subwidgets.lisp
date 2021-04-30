@@ -7,6 +7,9 @@
 (define-subwidget (main-window pc-value)
     (q+:make-qlabel "0" main-window))
 
+(define-subwidget (main-window halt-value)
+    (q+:make-qlabel "-" main-window))
+
 (define-subwidget (main-window r1-value) (q+:make-qlabel "0" main-window))
 (define-subwidget (main-window r2-value) (q+:make-qlabel "0" main-window))
 (define-subwidget (main-window r3-value) (q+:make-qlabel "0" main-window))
